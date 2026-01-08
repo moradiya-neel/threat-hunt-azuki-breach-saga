@@ -18,7 +18,7 @@ The investigation identified an active intrusion by JADE SPIDER (also known as A
 | Industry | Shipping logistics, Japan/SE Asia |
 | Employees | 23 |
 | Situation | Competitor undercut 6-year shipping contract by exactly 3%; supplier contracts and pricing data appeared on underground forums |
-| Compromised System | AZUKI-SL (IT admin workstation) |
+| Compromised System | azuki-sl (IT admin workstation) |
 | Evidence Available | Microsoft Defender for Endpoint logs (via Azure Log Analytics) |
 
 ### Threat Actor Profile
@@ -33,9 +33,6 @@ The investigation identified an active intrusion by JADE SPIDER (also known as A
 | Recent Activity | 30+ victims across Japan, South Korea, Taiwan, Singapore |
 | Typical Dwell Time | 21-45 days |
 | Last Observed | November 2025 |
-
-Threat Intel Report: [JADE SPIDER Profile](https://www.notion.so/JADE-SPIDER-2b0cf57416ff80f38f39f75f670b09e2)
-[Additional Details - By Threat Hunt Organizor]()
 
 ### Known Behaviour
 
@@ -57,8 +54,10 @@ Initial Access → Persistence → Credential Access → Lateral Movement → Co
 |-----------|-------|
 | Time Period | November 1 - November 22, 2025 |
 | Active Attack Period | November 19 - November 22, 2025 |
-| Target Device | AZUKI-SL |
+| Target Device | azuki-sl |
 | Data Source | Microsoft Defender for Endpoint logs (Azure Log Analytics) |
+
+Note: Hypothetically speaking, as this theat hunt was announced on 22nd November, 2025, I am keeing the scope for logs till that day. There are no previous logs available before 19th that's wht I put start data as November 1.
 
 ### Investigation Questions
 
@@ -67,8 +66,6 @@ Initial Access → Persistence → Credential Access → Lateral Movement → Co
 3. What data was stolen?
 4. What exfiltration method was used?
 5. Does persistent access remain?
-
-<img width="527" height="715" alt="Threat Intel Report" src="https://github.com/user-attachments/assets/e9b4c5d9-ef16-4e58-9c50-af61056c31c3" />
 
 ---
 
@@ -83,11 +80,12 @@ Initial Access → Persistence → Credential Access → Lateral Movement → Co
 DeviceLogonEvents
 | where DeviceName == "azuki-sl"
 | where TimeGenerated between (datetime(2025-11-01) .. datetime(2025-11-22))
-| where AccountName !startswith "dwm" and AccountName !startswith "umfd"
+| where AccountName !startswith "dwm" and AccountName !startswith "umfd" // filtering out system accounts
 | where ActionType == "LogonSuccess"
 | order by TimeGenerated asc
 | project TimeGenerated, AccountName, ActionType, LogonType, RemoteIP
 ```
+<img width="1200" alt="1" src="https://github.com/user-attachments/assets/30d29d94-f2be-4ae5-b530-700ec398f286" />
 
 **Finding:**
 
@@ -97,11 +95,11 @@ DeviceLogonEvents
 | External IP | 88.97.178.12 |
 | Account Used | kenji.sato |
 | Logon Type | Network → RemoteInteractive |
-| Target Device | AZUKI-SL |
+| Target Device | azuki-sl |
 
 **Analysis:**
 
-The first unauthorized access to AZUKI-SL originated from external IP address 88.97.178.12. The attacker successfully authenticated using the kenji.sato account via RDP. This timestamp marks the beginning of the active intrusion on the IT admin workstation.
+The first unauthorized access to azuki-sl originated from external IP address 88.97.178.12. The attacker successfully authenticated using the kenji.sato account via RDP. This timestamp marks the beginning of the active intrusion on the IT admin workstation.
 
 **MITRE ATT&CK Reference:**
 - External Remote Services (T1133)
@@ -119,12 +117,13 @@ The first unauthorized access to AZUKI-SL originated from external IP address 88
 ```kql
 DeviceLogonEvents
 | where DeviceName == "azuki-sl"
-| where TimeGenerated between (datetime(2025-11-19) .. datetime(2025-11-22))
+| where TimeGenerated between (datetime(2025-11-19) .. datetime(2025-11-22)) // as there is no activity before 19th on the account
 | where ActionType == "LogonSuccess"
 | where RemoteIP == "88.97.178.12"
 | order by TimeGenerated asc
 | project TimeGenerated, AccountName, ActionType, LogonType, RemoteIP
 ```
+<img width="1200" alt="2" src="https://github.com/user-attachments/assets/2f261803-c77d-40d9-9ea5-58b8af1246e2" />
 
 **Finding:**
 
@@ -134,11 +133,11 @@ DeviceLogonEvents
 | External IP | 88.97.178.12 |
 | Compromised Account | kenji.sato |
 | Logon Type | Network → RemoteInteractive |
-| Target Device | AZUKI-SL |
+| Target Device | azuki-sl |
 
 **Analysis:**
 
-The attacker used compromised credentials belonging to kenji.sato to gain initial access via RDP from external IP 88.97.178.12. Since AZUKI-SL is an IT admin workstation, this account likely has elevated privileges, making it a high-value target. This aligns with JADE SPIDER's known focus on credential theft and targeting privileged accounts.
+The attacker used compromised credentials belonging to kenji.sato to gain initial access via RDP from external IP 88.97.178.12. Since azuki-sl is an IT admin workstation, this account likely has elevated privileges, making it a high-value target. This aligns with JADE SPIDER's known focus on credential theft and targeting privileged accounts.
 
 **MITRE ATT&CK Reference:**
 - Valid Accounts (T1078)
@@ -155,31 +154,32 @@ The attacker used compromised credentials belonging to kenji.sato to gain initia
 ```kql
 DeviceProcessEvents
 | where DeviceName == "azuki-sl" and AccountName == "kenji.sato"
-| where TimeGenerated >= todatetime('2025-11-19T18:36:18.503997Z')
+| where TimeGenerated >= todatetime('2025-11-19T18:36:18.503997Z') // timestamp - first successful logon
 | where ProcessCommandLine has_any ("ipconfig", "arp", "net", "nbstat", "route", "ping")
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, ProcessCommandLine
 ```
+<img width="1200" alt="3" src="https://github.com/user-attachments/assets/14258a6c-bf49-47d2-9d00-266b0e29c8cf" />
 
 **Finding:**
 
 | Field | Value |
 |-------|-------|
 | Timestamp | November 19, 2025, 7:04:01 PM |
-| Command | arp -a |
+| Command | "ARP.EXE" -a |
 | Executable | ARP.EXE |
 | Path | C:\Windows\System32\ARP.EXE |
 | Account | kenji.sato |
-| Device | AZUKI-SL |
+| Device | azuki-sl |
 
 **Analysis:**
 
-Approximately 28 minutes after initial access, the attacker executed `arp -a` to enumerate devices on the local network. This command reveals IP-to-MAC address mappings, allowing the attacker to identify potential lateral movement targets. This is a standard reconnaissance technique used to map network topology before pivoting to other systems.
+Approximately 28 minutes after initial access, the attacker executed `"ARP.EXE" -a` to enumerate devices on the local network. This command reveals IP-to-MAC address mappings, allowing the attacker to identify potential lateral movement targets. This is a standard reconnaissance technique used to map network topology before pivoting to other systems.
 
 **MITRE ATT&CK Reference:**
 - System Network Configuration Discovery (T1016)
 
-**Flag Answer:** `arp -a`
+**Flag Answer:** `"ARP.EXE" -a`
 
 ---
 
@@ -191,11 +191,12 @@ Approximately 28 minutes after initial access, the attacker executed `arp -a` to
 ```kql
 DeviceProcessEvents
 | where DeviceName == "azuki-sl"
-| where TimeGenerated >= todatetime('2025-11-19T18:36:18.503997Z')
+| where TimeGenerated >= todatetime('2025-11-19T18:36:18.503997Z') // timestamp - first successful logon
 | where ProcessCommandLine has_any ("mkdir", "attrib", "md", "New-Item")
 | order by TimeGenerated asc
 | project TimeGenerated, AccountName, ActionType, FileName, FolderPath, ProcessCommandLine
 ```
+<img width="1200" alt="4" src="https://github.com/user-attachments/assets/f8458cfe-cc25-47c9-a089-e263533c25b6" />
 
 **Finding:**
 
@@ -204,7 +205,7 @@ DeviceProcessEvents
 | Timestamp | November 19, 2025, 7:05:33 PM |
 | Command | attrib.exe +h +s C:\ProgramData\WindowsCache |
 | Account | kenji.sato |
-| Device | AZUKI-SL |
+| Device | azuki-sl |
 | Staging Directory | C:\ProgramData\WindowsCache |
 
 **Analysis:**
@@ -767,7 +768,7 @@ The attacker used mstsc.exe, the native Windows Remote Desktop Client, to initia
 
 1. **Disable compromised accounts** - Immediately disable the kenji.sato account and reset all passwords. Also remove the "support" backdoor account.
 
-2. **Isolate affected systems** - Quarantine AZUKI-SL and investigate 10.1.0.188 for signs of compromise.
+2. **Isolate affected systems** - Quarantine azuki-sl and investigate 10.1.0.188 for signs of compromise.
 
 3. **Block malicious infrastructure** - Add the following to firewall blocklists:
    - 88.97.178.12 (Initial access IP)
@@ -797,5 +798,6 @@ The attacker used mstsc.exe, the native Windows Remote Desktop Client, to initia
 ## References
 
 - [JADE SPIDER Threat Intel Report](https://www.notion.so/JADE-SPIDER-2b0cf57416ff80f38f39f75f670b09e2)
+- [Additional Details - By Threat Hunt Organizor](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-1-port-of-entry/docs/additional-details.md)
 - [MITRE ATT&CK Framework](https://attack.mitre.org/)
 - [Microsoft Defender for Endpoint Documentation](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/)
