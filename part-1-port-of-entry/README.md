@@ -57,7 +57,7 @@ Initial Access → Persistence → Credential Access → Lateral Movement → Co
 | Target Device | azuki-sl |
 | Data Source | Microsoft Defender for Endpoint logs (Azure Log Analytics) |
 
-Note: Hypothetically speaking, as this theat hunt was announced on 22nd November, 2025, I am keeing the scope for logs till that day. There are no previous logs available before 19th that's wht I put start data as November 1.
+**Note:** This threat hunt was initiated on November 22, 2025, establishing the end date for the investigation scope. However, no relevant log activity was recorded prior to November 19, which marks the start of the active attack period.  
 
 ### Investigation Questions
 
@@ -66,6 +66,11 @@ Note: Hypothetically speaking, as this theat hunt was announced on 22nd November
 3. What data was stolen?
 4. What exfiltration method was used?
 5. Does persistent access remain?
+
+### Supporting Documents
+
+- [Attack Timeline](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-1-port-of-entry/docs/chronological-timeline.md) - Chronological breakdown of attacker activity
+- [Indicators of Compromise](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-1-port-of-entry/docs/indicators-of-compromise.md) - Complete IOCs list
 
 ---
 
@@ -278,7 +283,7 @@ DeviceRegistryEvents
 
 **Analysis:**
 
-The attacker excluded the user's temporary folder from Windows Defender scanning. The Temp folder is commonly used by attackers as a download location for malicious tools because users have write permissions, temporary files are often overlooked, and many legitimate applications use this location. By excluding this path, the attacker ensured any files downloaded here would not be scanned by Defender.
+The attacker added two folder path exclusions to Windows Defender. The first exclusion targeted the user's temporary folder `C:\Users\KENJI~1.SAT\AppData\Local\Temp`, which is commonly used by attackers as a download location for malicious tools because users have write permissions, temporary files are often overlooked during security reviews, and many legitimate applications use this location. The second exclusion targeted the attacker's staging directory `C:\ProgramData\WindowsCache`, ensuring that all malware and tools stored there would evade Defender scanning. By excluding both paths, the attacker created safe zones for downloading, staging, and executing malicious payloads without triggering antivirus alerts.
 
 **MITRE ATT&CK Reference:**
 - Impair Defenses: Disable or Modify Tools (T1562.001)
@@ -769,7 +774,7 @@ The attacker used mstsc.exe, the native Windows Remote Desktop Client, to initia
 | Defence Evasion | Indicator Removal: Clear Windows Event Logs | T1070.001 | wevtutil.exe log clearing |
 | Defence Evasion | System Binary Proxy Execution | T1218 | certutil.exe abuse |
 | Credential Access | OS Credential Dumping: LSASS Memory | T1003.001 | Mimikatz (mm.exe) |
-| Discovery | System Network Configuration Discovery | T1016 | arp -a command |
+| Discovery | System Network Configuration Discovery | T1016 | "ARP.EXE" -a command |
 | Lateral Movement | Remote Services: Remote Desktop Protocol | T1021.001 | mstsc.exe to 10.1.0.188 |
 | Lateral Movement | Use Alternate Authentication Material | T1550 | cmdkey credential storage |
 | Collection | Archive Collected Data: Archive via Utility | T1560.001 | export-data.zip |
