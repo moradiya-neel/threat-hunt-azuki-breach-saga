@@ -233,6 +233,7 @@ DeviceRegistryEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, RegistryKey, RegistryValueName, RegistryValueData
 ```
+<img width="1200" alt="5" src="https://github.com/user-attachments/assets/feefb97e-0c8f-4138-a82f-9bc18a535d29" />
 
 **Finding:**
 
@@ -262,10 +263,11 @@ The attacker added three file extension exclusions to Windows Defender to preven
 DeviceRegistryEvents
 | where DeviceName == "azuki-sl"
 | where TimeGenerated >= todatetime('2025-11-19T18:36:18.503997Z')
-| where RegistryKey contains "Exclusions\\Paths"
+| where RegistryKey contains "Exclusions\\Paths" \\ @"Exclusions\Paths"
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, RegistryKey, RegistryValueName, RegistryValueData
 ```
+<img width="1200" alt="6" src="https://github.com/user-attachments/assets/d20847cf-8d16-49c9-9575-bac0804a89e8" />
 
 **Finding:**
 
@@ -298,6 +300,7 @@ DeviceProcessEvents
 | order by TimeGenerated asc
 | project TimeGenerated, AccountName, ActionType, FileName, FolderPath, ProcessCommandLine
 ```
+<img width="1200" alt="7" src="https://github.com/user-attachments/assets/3ec76184-aea6-496f-9113-9b92eab5c7f1" />
 
 **Finding:**
 
@@ -308,11 +311,11 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker abused certutil.exe, a legitimate Windows certificate utility, to download malicious files from an attacker-controlled server. This is a classic "Living Off The Land" technique because certutil.exe is digitally signed by Microsoft, present on all Windows systems, bypasses application whitelisting, and security tools may not flag its network activity.
+The attacker abused `certutil.exe`, a legitimate Windows certificate utility, to download malicious files from an attacker-controlled server. This is a classic `"Living Off The Land"` technique because `certutil.exe` is digitally signed by Microsoft, present on all Windows systems, bypasses application whitelisting, and security tools may not flag its network activity.
 
 **Files Downloaded via Certutil:**
 
-| Remote File | Local Path | Purpose |
+| Remote File | Local Path | Purpose (Likely) |
 |-------------|------------|---------|
 | svchost.exe | C:\ProgramData\WindowsCache\svchost.exe | Malware disguised as system process |
 | AdobeGC.exe | C:\ProgramData\WindowsCache\mm.exe | Credential theft tool (Mimikatz) |
@@ -340,6 +343,7 @@ DeviceProcessEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, ProcessCommandLine
 ```
+<img width="1200" alt="8 9" src="https://github.com/user-attachments/assets/9af26dde-e769-41a7-80be-0d29fbf1ca01" />
 
 **Finding:**
 
@@ -373,6 +377,8 @@ The attacker created a scheduled task named "Windows Update Check" to maintain p
 
 **Reference:** This finding was derived from the same query results as Flag 8.
 
+<img width="1200" alt="8 9" src="https://github.com/user-attachments/assets/fc4d16cf-fab7-4ed4-96c9-05539442418b" />
+
 **Finding:**
 
 | Field | Value |
@@ -383,7 +389,7 @@ The attacker created a scheduled task named "Windows Update Check" to maintain p
 
 **Analysis:**
 
-The scheduled task was configured to execute svchost.exe from the attacker's staging directory. This is the same malicious file downloaded earlier via certutil.exe from the attacker-controlled server. By naming the malware svchost.exe and placing it in a hidden directory, the attacker attempted to disguise it as a legitimate Windows system process.
+The scheduled task was configured to execute `svchost.exe` from the attacker's staging directory. This is the same malicious file downloaded earlier via `certutil.exe` from the attacker-controlled server. By naming the malware `svchost.exe` and placing it in a hidden directory, the attacker attempted to disguise it as a legitimate Windows system process.
 
 **MITRE ATT&CK Reference:**
 - Scheduled Task/Job: Scheduled Task (T1053.005)
@@ -399,13 +405,14 @@ The scheduled task was configured to execute svchost.exe from the attacker's sta
 
 **Query Used:**
 ```kql
-DeviceNetworkEvents
+DeviceNetworkEvents // all the conditions below are used based on flag 7 results
 | where DeviceName == "azuki-sl" and InitiatingProcessAccountName == "kenji.sato"
 | where TimeGenerated >= todatetime('2025-11-19T19:06:58.5778439Z')
 | where InitiatingProcessFileName has_any ("svchost.exe", "mm.exe") and InitiatingProcessFolderPath contains "WindowsCache"
 | order by TimeGenerated asc 
 | project TimeGenerated, ActionType, InitiatingProcessCommandLine, InitiatingProcessFileName, InitiatingProcessFolderPath, RemoteIP, RemotePort
 ```
+<img width="1200" alt="10 11" src="https://github.com/user-attachments/assets/c328b0fc-af9d-407b-bc8c-c2c882605bda" />
 
 **Finding:**
 
@@ -420,7 +427,7 @@ DeviceNetworkEvents
 
 **Analysis:**
 
-The malicious svchost.exe initiated a successful outbound connection to 78.141.196.6 on port 443 (HTTPS). This is the same IP address from which the malware was originally downloaded, confirming it serves as both a malware staging server (hosting the malicious payloads) and a command and control server (receiving connections from infected hosts). The use of port 443 is a common technique to blend C2 traffic with legitimate HTTPS traffic, making it harder to detect via network monitoring.
+The malicious executable `svchost.exe` initiated a successful outbound connection to `78.141.196.6` on port `443 (HTTPS)`. This is the same IP address from which the malware was originally downloaded, confirming it serves as both a malware staging server (hosting the malicious payloads) and a command and control server (receiving connections from infected hosts). The use of port `443` is a common technique to blend C2 traffic with legitimate HTTPS traffic, making it harder to detect via network monitoring.
 
 **MITRE ATT&CK Reference:**
 - Command and Control (TA0011)
@@ -447,7 +454,7 @@ The malicious svchost.exe initiated a successful outbound connection to 78.141.1
 
 **Analysis:**
 
-The malware communicates with the C2 server over port 443, the standard HTTPS port. This is a deliberate evasion technique because port 443 traffic is expected on corporate networks, encrypted by default, often allowed through firewalls without inspection, and difficult to distinguish from legitimate web traffic. This technique is commonly used by advanced threat actors to avoid detection by blending malicious traffic with normal business operations.
+The malware communicates with the C2 server over port `443`, the standard HTTPS port. This is a deliberate evasion technique because port `443` traffic is expected on corporate networks, encrypted by default, often allowed through firewalls without inspection, and difficult to distinguish from legitimate web traffic. This technique is commonly used by advanced threat actors to avoid detection by blending malicious traffic with normal business operations.
 
 **MITRE ATT&CK Reference:**
 - Application Layer Protocol: Web Protocols (T1071.001)
@@ -469,6 +476,7 @@ DeviceProcessEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, ProcessCommandLine
 ```
+<img width="1200" alt="12 13" src="https://github.com/user-attachments/assets/8f84c1e2-1d66-4535-ac4a-10e0a896348f" />
 
 **Finding:**
 
@@ -506,7 +514,7 @@ The attacker executed mm.exe with command-line arguments that confirm it is Mimi
 
 **Analysis:**
 
-The attacker used the sekurlsa::logonpasswords module to extract credentials from LSASS memory. This is one of the most commonly used Mimikatz modules because it retrieves plaintext passwords (if available), NTLM password hashes, and Kerberos tickets for all logged-on users. The extracted credentials likely enabled the attacker to access additional accounts and move laterally within the network.
+The attacker used the `sekurlsa::logonpasswords` module to extract credentials from LSASS memory. This is one of the most commonly used Mimikatz modules because it retrieves plaintext passwords (if available), NTLM password hashes, and Kerberos tickets for all logged-on users. The extracted credentials likely enabled the attacker to access additional accounts and move laterally within the network.
 
 **MITRE ATT&CK Reference:**
 - OS Credential Dumping: LSASS Memory (T1003.001)
@@ -528,6 +536,7 @@ DeviceFileEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, InitiatingProcessFileName
 ```
+<img width="1200" alt="14" src="https://github.com/user-attachments/assets/e737bcdf-4e35-4c03-a1c1-8c49c95b2777" />
 
 **Finding:**
 
@@ -538,7 +547,7 @@ DeviceFileEvents
 
 **Analysis:**
 
-The attacker created a compressed archive named export-data.zip in the staging directory. This file was used to package stolen data for exfiltration. The descriptive filename "export-data" suggests the attacker organized the collected information before transferring it out of the network.
+The attacker created a compressed archive named `export-data.zip` in the staging directory. This file was used to package stolen data for exfiltration. The descriptive filename "export-data" suggests the attacker organized the collected information before transferring it out of the network.
 
 **MITRE ATT&CK Reference:**
 - Archive Collected Data: Archive via Utility (T1560.001)
@@ -553,6 +562,8 @@ The attacker created a compressed archive named export-data.zip in the staging d
 
 **Reference:** This finding was derived from the same query results as Flag 7 (while looking for URL-related commands).
 
+<img width="1200" alt="7" src="https://github.com/user-attachments/assets/7d4e9fe3-7ee2-48f8-a543-7ed7ba32f1e7" />
+
 **Finding:**
 
 | Field | Value |
@@ -563,7 +574,7 @@ The attacker created a compressed archive named export-data.zip in the staging d
 
 **Analysis:**
 
-The attacker abused Discord's webhook functionality to exfiltrate the stolen data archive. Discord webhooks are commonly abused by threat actors for data exfiltration because they allow anonymous file uploads without authentication, the service is widely permitted through corporate firewalls, HTTPS encryption masks the data transfer, and uploaded files can be easily retrieved by the attacker later. The use of curl.exe with the -F parameter indicates a file upload operation to the Discord webhook URL.
+The attacker abused Discord's webhook functionality to exfiltrate the stolen data archive. Discord webhooks are commonly abused by threat actors for data exfiltration because they allow anonymous file uploads without authentication, the service is widely permitted through corporate firewalls, HTTPS encryption masks the data transfer, and uploaded files can be easily retrieved by the attacker later. The use of `curl.exe` with the `-F` parameter indicates a file upload operation to the Discord webhook URL.
 
 **MITRE ATT&CK Reference:**
 - Exfiltration Over Web Service (T1567)
@@ -585,6 +596,7 @@ DeviceProcessEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, ProcessCommandLine
 ```
+<img width="1200" alt="16" src="https://github.com/user-attachments/assets/f4bc180e-8eba-4e74-b75a-d199c750eef1" />
 
 **Finding:**
 
@@ -618,6 +630,7 @@ DeviceProcessEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, ProcessCommandLine
 ```
+<img width="1200" alt="17" src="https://github.com/user-attachments/assets/e1934743-551c-4fc3-a7b7-80903270ed2a" />
 
 **Finding:**
 
@@ -645,6 +658,8 @@ The attacker created a local account named "support" and immediately elevated it
 
 **Reference:** This finding was derived from the same query results as Flag 7.
 
+<img width="1200" alt="Screenshot 2026-01-08 at 7 46 47 PM" src="https://github.com/user-attachments/assets/41670991-c0d2-4407-9e98-0ccf1ba621d4" />
+
 **Alternative Query:**
 ```kql
 DeviceFileEvents
@@ -667,7 +682,7 @@ DeviceFileEvents
 
 **Analysis:**
 
-The attacker downloaded and executed a PowerShell script named wupdate.ps1 from the attacker-controlled server. The filename was crafted to appear as a legitimate Windows Update script, using the "wupdate" prefix to blend with normal system activity. The script was executed with the `-ExecutionPolicy Bypass` and `-WindowStyle Hidden` parameters to evade security controls and hide the execution window from the user. This script served as the primary automation mechanism for the attack chain, likely orchestrating the subsequent activities including Defender exclusions, malware downloads, credential theft, and data exfiltration.
+The attacker downloaded and executed a PowerShell script named wupdate.ps1 from the C2 server. The filename was crafted to appear as a legitimate Windows Update script, using the "wupdate" prefix to blend with normal system activity. The script was executed with the `-ExecutionPolicy Bypass` and `-WindowStyle Hidden` parameters to evade security controls and hide the execution window from the user. This script served as the primary automation mechanism for the attack chain, likely orchestrating the subsequent activities including Defender exclusions, malware downloads, credential theft, and data exfiltration.
 
 **MITRE ATT&CK Reference:**
 - Command and Scripting Interpreter: PowerShell (T1059.001)
@@ -689,6 +704,7 @@ DeviceProcessEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, ProcessCommandLine
 ```
+<img width="1200" alt="19 20" src="https://github.com/user-attachments/assets/dc37edf9-b04e-402e-bc3a-f91ed8e727d4" />
 
 **Finding:**
 
@@ -700,7 +716,7 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker targeted internal IP address 10.1.0.188 for lateral movement. The attack sequence shows a methodical approach: the attacker first enumerated existing stored credentials using `cmdkey /list`, then stored the fileadmin account credentials for the target system, and finally initiated an RDP connection using mstsc.exe. The use of cmdkey.exe to store credentials before RDP connection allows for seamless authentication without interactive password prompts, enabling automated or scripted lateral movement. The fileadmin credentials were likely obtained through the Mimikatz credential dump.
+The attacker targeted internal IP address `10.1.0.188` for lateral movement. The attack sequence shows a methodical approach: the attacker first enumerated existing stored credentials using `cmdkey /list`, then stored the fileadmin account credentials for the target system, and finally initiated an RDP connection using `mstsc.exe`. The use of `cmdkey.exe` to store credentials before RDP connection allows for seamless authentication without interactive password prompts, enabling automated or scripted lateral movement. The fileadmin credentials were likely obtained through the Mimikatz credential dump.
 
 **MITRE ATT&CK Reference:**
 - Remote Services: Remote Desktop Protocol (T1021.001)
@@ -716,6 +732,8 @@ The attacker targeted internal IP address 10.1.0.188 for lateral movement. The a
 
 **Reference:** This finding was derived from the same query results as Flag 19.
 
+<img width="1200" alt="19 20" src="https://github.com/user-attachments/assets/b1eae55b-af8a-4515-bd15-48fce349ca14" />
+
 **Finding:**
 
 | Field | Value |
@@ -727,7 +745,7 @@ The attacker targeted internal IP address 10.1.0.188 for lateral movement. The a
 
 **Analysis:**
 
-The attacker used mstsc.exe, the native Windows Remote Desktop Client, to initiate lateral movement to the target system at 10.1.0.188. This is a "living off the land" technique where attackers leverage built-in system tools rather than custom malware. Using mstsc.exe for lateral movement is advantageous for attackers because it is a legitimate, Microsoft-signed binary present on all Windows systems, generates traffic indistinguishable from normal administrative activity, and is unlikely to trigger security alerts based on process execution alone.
+The attacker used mstsc.exe, the native Windows Remote Desktop Client, to initiate lateral movement to the target system at `10.1.0.188`. This is a `"living off the land"` technique where attackers leverage built-in system tools rather than custom malware. Using mstsc.exe for lateral movement is advantageous for attackers because it is a legitimate, Microsoft-signed binary present on all Windows systems, generates traffic indistinguishable from normal administrative activity, and is unlikely to trigger security alerts based on process execution alone.
 
 **MITRE ATT&CK Reference:**
 - Remote Services: Remote Desktop Protocol (T1021.001)
