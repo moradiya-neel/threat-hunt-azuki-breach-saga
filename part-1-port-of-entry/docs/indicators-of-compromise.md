@@ -1,4 +1,4 @@
-# JADE SPIDER Threat Hunt - Part 1: Indicators of Compromise (IOCs)
+# AZUKI BREACH Threat Hunt - Part 1: Indicators of Compromise (IOCs)
 
 This document contains all Indicators of Compromise identified during the Part 1 threat hunt investigation of the JADE SPIDER intrusion at Azuki Import/Export Trading Co.
 
