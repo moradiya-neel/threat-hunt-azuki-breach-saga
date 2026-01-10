@@ -1,4 +1,4 @@
-# JADE SPIDER Threat Hunt - Part 1: Attack Timeline
+# AZUKI BREACH Threat Hunt - Part 1: Attack Timeline
 
 This document provides a chronological timeline of the JADE SPIDER intrusion at Azuki Import/Export Trading Co., reconstructed from Azure Log Analytics logs during the Part 1 investigation.
 
