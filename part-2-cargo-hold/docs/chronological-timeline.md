@@ -1,4 +1,4 @@
-# JADE SPIDER Threat Hunt - Part 2: Attack Timeline
+# AZUKI BREACH Threat Hunt - Part 2: Attack Timeline
 
 This document provides a chronological timeline of the JADE SPIDER intrusion during Part 2 of the investigation, focusing on the attacker's return on November 22, 2025, and their activities on the file server (azuki-fileserver01).
 
