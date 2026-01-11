@@ -1,5 +1,7 @@
 # THE AZUKI BREACH SAGA - Part 2: Cargo Hold
 
+<img width="641" height="1037" alt="Screenshot 2026-01-08 at 8 27 54 PM" src="https://github.com/user-attachments/assets/c72df5dc-48fc-4fd1-8c64-e5748dad6c59" />
+
 ## Executive Summary
 
 This report documents the findings from Part 2 of the threat hunting investigation conducted on Azuki Import/Export Trading Co. After establishing initial access on November 19th, network monitoring detected the attacker returning approximately 54 hours later on November 22nd. The investigation revealed lateral movement to the file server (azuki-fileserver01), extensive data collection from file shares containing sensitive business information including administrator passwords, and exfiltration of compressed archives to an anonymous file sharing service (file.io).
