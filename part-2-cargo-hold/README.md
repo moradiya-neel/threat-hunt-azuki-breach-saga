@@ -1,6 +1,6 @@
 # THE AZUKI BREACH SAGA - Part 2: Cargo Hold
 
-<img width="641" height="1037" alt="Screenshot 2026-01-08 at 8 27 54 PM" src="https://github.com/user-attachments/assets/c72df5dc-48fc-4fd1-8c64-e5748dad6c59" />
+<img width="740" height="1110" alt="image (1)" src="https://github.com/user-attachments/assets/e1db71ed-2f10-42d8-8a3b-50d88bc8cf35" />
 
 ## Executive Summary
 
