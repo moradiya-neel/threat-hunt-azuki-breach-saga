@@ -209,4 +209,4 @@ This document provides a chronological timeline of the JADE SPIDER intrusion dur
 
 This timeline represents the complete attacker activity during Part 2 of the intrusion. The attacker completed their objectives on the file server within approximately 2 hours, demonstrating efficiency and familiarity with the target environment likely gained during Part 1 reconnaissance.
 
-**Investigation Scope:** November 22 - December 6, 2025
+**Investigation Scope:** November 22 - November 23, 2025
