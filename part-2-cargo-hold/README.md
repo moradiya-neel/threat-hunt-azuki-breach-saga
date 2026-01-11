@@ -59,7 +59,7 @@ The attacker demonstrated increased sophistication compared to Part 1, using Pro
 ```kql
 DeviceLogonEvents
 | where DeviceName == "azuki-sl"
-| where TimeGenerated between (datetime(2025-11-19) .. datetime(2025-12-06))
+| where TimeGenerated between (datetime(2025-11-19) .. datetime(2025-11-23))
 | where ActionType == "LogonSuccess"
 | where LogonType in ("Network", "RemoteInteractive")
 | where RemoteIP != "" and RemoteIP !startswith "10."
@@ -100,12 +100,12 @@ The attacker returned to the compromised environment approximately 54 hours afte
 ```kql
 DeviceProcessEvents
 | where DeviceName == "azuki-sl"
-| where TimeGenerated between (datetime(2025-11-22) .. datetime(2025-12-06))
+| where TimeGenerated between (datetime(2025-11-22) .. datetime(2025-11-23))
 | where ProcessCommandLine contains "mstsc"
 | order by TimeGenerated asc 
 | project TimeGenerated, ActionType, FileName, FolderPath, InitiatingProcessCommandLine, ProcessCommandLine
 ```
-<img width="1200" alt="2(1)" src="https://github.com/user-attachments/assets/41ed2777-4aa8-4149-9bfb-f80a1c8df293" />
+<img width="1200" alt="Screenshot 2026-01-10 at 8 37 08 PM" src="https://github.com/user-attachments/assets/bd049abe-f74b-46d2-a1fd-01afadc1ae3c" />
 
 *Step 2: Correlate IP to device name*
 ```kql
