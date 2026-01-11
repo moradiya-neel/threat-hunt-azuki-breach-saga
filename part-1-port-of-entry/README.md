@@ -1,6 +1,6 @@
 # THE AZUKI BREACH SAGA - Part 1: Port of Entry
 
-<img width="641" height="1037" alt="Screenshot 2026-01-08 at 5 24 03 PM" src="https://github.com/user-attachments/assets/206fe748-7fc9-4c5b-8b9f-4456cfc0cf2f" />
+<img width="740" height="1110" alt="Screenshot 2026-01-10 at 8 24 11 PM" src="https://github.com/user-attachments/assets/6f69151b-e97b-4c41-8f8f-747a15b85ab9" />
 
 ## Executive Summary
 
