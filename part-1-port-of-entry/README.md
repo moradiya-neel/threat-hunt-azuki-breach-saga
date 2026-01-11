@@ -1,5 +1,7 @@
 # THE AZUKI BREACH SAGA - Part 1: Port of Entry
 
+<img width="641" height="1037" alt="Screenshot 2026-01-08 at 5 24 03 PM" src="https://github.com/user-attachments/assets/206fe748-7fc9-4c5b-8b9f-4456cfc0cf2f" />
+
 ## Executive Summary
 
 This report documents the findings from a threat hunting investigation conducted on Azuki Import/Export Trading Co. following the discovery that proprietary supplier contracts and pricing data appeared on underground forums. A competitor subsequently undercut a 6-year shipping contract by exactly 3%, suggesting targeted corporate espionage.
