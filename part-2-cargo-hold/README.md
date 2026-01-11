@@ -25,12 +25,12 @@ The attacker demonstrated increased sophistication compared to Part 1, using Pro
 
 | Parameter | Value |
 |-----------|-------|
-| Time Period | November 22 - December 6, 2025 |
+| Time Period | November 22 - November 23, 2025 |
 | Active Attack Period | November 22, 2025, 12:27 AM - 2:26 AM |
 | Target Devices | azuki-sl, azuki-fileserver01 |
 | Data Source | Microsoft Defender for Endpoint logs (Azure Log Analytics) |
 
-> **Note:** This threat hunt was initiated on December 6, 2025, establishing the end date for the investigation scope. The active attack period was confined to November 22, 2025, with the attacker completing their operations within approximately 2 hours.
+> **Note:** The investigation scope for Part 2 covers November 22 - November 23, 2025. The active attack period was confined to November 22, 2025, with the attacker completing their operations on the file server within approximately 2 hours.
 
 ### Supporting Documents
 
