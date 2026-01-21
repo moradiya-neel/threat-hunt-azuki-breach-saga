@@ -932,10 +932,10 @@ With both the KeePass database and its master password, the attacker now has acc
 ## References
 
 - [JADE SPIDER Threat Intel Report](https://www.notion.so/JADE-SPIDER-2b0cf57416ff80f38f39f75f670b09e2)
+- [Additional Details - By Threat Hunt Organizor](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-3-bridge-takeover/docs/additional-details.md)
 - [MITRE ATT&CK Framework](https://attack.mitre.org/)
 - [Microsoft Defender for Endpoint Documentation](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/)
-- [Part 1 Investigation Report](../Part-1/README.md)
-- [Part 2 Investigation Report](../Part-2/README.md)
+- [Summary - The AZUKI BREACH SAGA](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/README.md)
 - [Part 1 Investigation Report](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-1-port-of-entry)
 - [Part 2 Cargo Hold](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-2-cargo-hold)
-- [Part 4 Dead in the Water](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-4-dead-in-the-water) - Ongoing
+- [Part 4 Dead in the Water](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-4-dead-in-the-water)
