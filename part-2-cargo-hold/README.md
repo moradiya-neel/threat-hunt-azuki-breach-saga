@@ -863,6 +863,6 @@ This anti-forensic action occurred near the end of the attack sequence (2:26 AM)
 - [MITRE ATT&CK Framework](https://attack.mitre.org/)
 - [Microsoft Defender for Endpoint Documentation](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/)
 - [Part 1 Investigation Report](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-1-port-of-entry)
-- [Part 3 Bridge Takeover](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-3-bridge-takeover) - ongoing
-- [Part 4 Dead in the Water](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-4-dead-in-the-water) - Upcoming
+- [Part 3 Bridge Takeover](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-3-bridge-takeover)
+- [Part 4 Dead in the Water](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-4-dead-in-the-water) - ongoing
 
