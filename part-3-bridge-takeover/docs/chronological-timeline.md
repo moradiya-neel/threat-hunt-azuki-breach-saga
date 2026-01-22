@@ -232,4 +232,4 @@ This document provides a chronological timeline of the JADE SPIDER intrusion dur
 
 This timeline represents the complete activity of the attacker during Part 3 of the intrusion. The attacker demonstrated significant evolution in tactics, deploying professional penetration testing tools and a custom implant while maintaining operational security through tool rotation and anti-forensic cleanup.
 
-**Investigation Scope:** November 24 - December 6, 2025
+**Investigation Scope:** November 24 - November 26, 2025
