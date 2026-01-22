@@ -447,7 +447,7 @@ The attacker created a backdoor account named `yuki.tanaka2` that closely mimics
 
 | Part | Account | Device | Naming Strategy |
 |------|---------|--------|-----------------|
-| Part 1 | support | AZUKI-SL | Generic IT support name |
+| Part 1 | support | azuki-sl | Generic IT support name |
 | Part 3 | yuki.tanaka2 | azuki-adminpc | Mimic existing user |
 
 The evolution in naming strategy shows increased sophistication - while `support` might raise questions during an audit, `yuki.tanaka2` could easily be mistaken for a secondary account belonging to the legitimate user or a test account.
@@ -792,7 +792,7 @@ The attacker established `C:\ProgramData\Microsoft\Crypto\staging` as the data s
 
 | Part | Device | Staging Directory | Strategy |
 |------|--------|-------------------|----------|
-| Part 1 | AZUKI-SL | C:\ProgramData\WindowsCache | Custom hidden folder |
+| Part 1 | azuki-sl | C:\ProgramData\WindowsCache | Custom hidden folder |
 | Part 2 | azuki-fileserver01 | C:\Windows\Logs\CBS | Abuse existing Windows folder |
 | Part 3 | azuki-adminpc | C:\ProgramData\Microsoft\Crypto\staging | Mimic legitimate crypto service |
 
