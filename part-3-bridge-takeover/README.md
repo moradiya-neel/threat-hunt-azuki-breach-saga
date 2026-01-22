@@ -25,7 +25,7 @@ The investigation revealed extensive credential theft targeting browser-saved pa
 
 | Parameter | Value |
 |-----------|-------|
-| Time Period | November 24 - December 6, 2025 |
+| Time Period | November 24 - November 26, 2025 |
 | Active Attack Period | November 25, 2025, 4:06 AM - 6:10 AM |
 | Target Device | azuki-adminpc |
 | Data Source | Microsoft Defender for Endpoint logs (Azure Log Analytics) |
