@@ -1,4 +1,4 @@
-## Additional Details - By Threat Hunt Organizor
+## Additional Details - By Threat Hunt Organizer
 
 <img width="641" height="1037" alt="Screenshot 2026-01-08 at 8 27 54 PM" src="https://github.com/user-attachments/assets/c72df5dc-48fc-4fd1-8c64-e5748dad6c59" />
 <img width="641" alt="Screenshot 2026-01-08 at 8 28 20 PM" src="https://github.com/user-attachments/assets/39d3b00c-5999-422a-b0f5-0e3e3aadaa81" />
