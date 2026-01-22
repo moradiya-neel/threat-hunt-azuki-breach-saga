@@ -218,7 +218,16 @@ The attacker used `litter.catbox.moe`, an anonymous file hosting service, to sta
 
 **Analysis:**
 
-The attacker used `curl.exe` to download a malicious archive disguised as a Windows security update. The `-L` flag follows redirects, and `-o` specifies the output path. The filename `KB5044273-x64.7z` mimics legitimate Windows update naming conventions to avoid suspicion.
+The attacker used `curl.exe` to download a malicious archive from the anonymous file hosting service. The command-line arguments reveal the methodology:
+
+| Argument | Purpose |
+|----------|---------|
+| `-L` | Follow redirects |
+| `-o` | Output to specified file path |
+| `C:\Windows\Temp\cache\` | Download location (Temp folder) |
+| `KB5044273-x64.7z` | Filename disguised as Windows security update |
+
+The downloaded file was named to masquerade as a legitimate Windows update (KB5044273), a common technique to avoid suspicion during casual inspection. The use of a `.7z` archive format suggests the payload may contain multiple files or tools that will be extracted after download.
 
 **MITRE ATT&CK Reference:**
 - Ingress Tool Transfer (T1105)
@@ -254,7 +263,18 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used `7z.exe` to extract the password-protected archive. The command-line flags include `-p` for the password (redacted), `-o` for output directory, and `-y` to suppress prompts. Password-protected archives prevent security tools from inspecting contents during download.
+The attacker used `7z.exe` to extract the password-protected archive just 20 seconds after downloading it. The command-line arguments reveal the methodology:
+
+| Argument | Purpose |
+|----------|---------|
+| `x` | Extract with full paths |
+| `-p********` | Password for encrypted archive (redacted in logs) |
+| `-oC:\Windows\Temp\cache\` | Output directory |
+| `-y` | Assume Yes to all prompts (silent extraction) |
+
+The use of password-protected archives serves multiple evasion purposes: it prevents security tools from inspecting the archive contents during download, bypasses basic content inspection at network perimeters, and ensures only the attacker can extract the payload.
+
+**Bonus Finding:** A second archive (`m-temp.7z`) was downloaded and extracted approximately 1.5 hours later, suggesting the attacker deployed additional tools during the operation.
 
 **MITRE ATT&CK Reference:**
 - Deobfuscate/Decode Files or Information (T1140)
@@ -292,7 +312,18 @@ DeviceFileEvents
 
 **Analysis:**
 
-The archive contained multiple offensive security tools, with `meterpreter.exe` being the primary C2 beacon. The presence of `silentlynx.exe` is particularly notable as "SilentLynx" is a known alias for JADE SPIDER, confirming threat actor attribution.
+The archive contained multiple offensive security tools, with `meterpreter.exe` being the C2 beacon. Meterpreter is a well-known payload from the Metasploit Framework that provides attackers with an interactive shell and extensive post-exploitation capabilities including file system access, credential harvesting, privilege escalation, and lateral movement.
+
+**Tools Extracted from Archive:**
+
+| Filename | Purpose |
+|----------|---------|
+| **meterpreter.exe** | Metasploit C2 beacon |
+| m.exe | Likely Mimikatz (credential dumping) |
+| silentlynx.exe | Custom JADE SPIDER implant (matches threat actor alias) |
+| PsExec64.exe | Sysinternals remote execution tool |
+
+The presence of `silentlynx.exe` is particularly notable as "SilentLynx" is a known alias for JADE SPIDER, confirming threat actor attribution. The attacker also demonstrated anti-forensic behavior by deleting tools after use (m.exe and PsExec64.exe).
 
 **MITRE ATT&CK Reference:**
 - Command and Scripting Interpreter (T1059)
@@ -329,7 +360,17 @@ DeviceEvents
 
 **Analysis:**
 
-The Meterpreter implant created a named pipe `\Device\NamedPipe\msf-pipe-5902`. The `msf-pipe-*` naming pattern is a well-known behavioral indicator for Metasploit-based implants.
+The Meterpreter C2 implant created a named pipe `\Device\NamedPipe\msf-pipe-5902` approximately 3 minutes after extraction. The pipe name follows a distinctive pattern:
+
+| Component | Meaning |
+|-----------|---------|
+| `msf` | Metasploit Framework |
+| `pipe` | Named pipe identifier |
+| `5902` | Random/session identifier |
+
+Named pipes are used by Meterpreter for inter-process communication, enabling features like token manipulation, privilege escalation, and pivoting. The `msf-pipe-*` naming pattern is a well-known behavioral indicator for Metasploit-based implants and can be used for detection rules.
+
+The other named pipes in the results (`mojo.*`, `crashpad_*`) are legitimate Windows/Edge processes and can be filtered out as noise.
 
 **MITRE ATT&CK Reference:**
 - Internal Proxy (T1090.001)
@@ -365,7 +406,14 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used Base64-encoded PowerShell commands to obfuscate account creation activity. When decoded, the commands reveal the creation of a backdoor account named `yuki.tanaka2` with the password `B@ckd00r2024!`.
+The attacker used Base64-encoded PowerShell commands to obfuscate account creation activity. When decoded, the commands reveal the creation of a backdoor account:
+
+1. **Create account:** `net user yuki.tanaka2 B@ckd00r2024! /add`
+2. **Add to Administrators:** `net localgroup Administrators yuki.tanaka2 /add`
+
+The account naming convention (`yuki.tanaka2`) is designed to blend in with the legitimate compromised account (`yuki.tanaka`), making it harder to detect during casual review. The password `B@ckd00r2024!` follows common complexity requirements while being easily remembered by the attacker.
+
+This is similar to Part 1, where the attacker created the `support` backdoor account, demonstrating consistent persistence methodology across the intrusion.
 
 **MITRE ATT&CK Reference:**
 - Obfuscated Files or Information (T1027)
@@ -393,7 +441,16 @@ The attacker used Base64-encoded PowerShell commands to obfuscate account creati
 
 **Analysis:**
 
-The attacker created `yuki.tanaka2` to mimic the legitimate `yuki.tanaka` account, making it harder to detect during casual review.
+The attacker created a backdoor account named `yuki.tanaka2` that closely mimics the legitimate compromised account `yuki.tanaka`. This naming convention is a deliberate attempt to blend in with existing accounts and avoid detection during casual review of user lists.
+
+**Backdoor Accounts Across All Parts:**
+
+| Part | Account | Device | Naming Strategy |
+|------|---------|--------|-----------------|
+| Part 1 | support | AZUKI-SL | Generic IT support name |
+| Part 3 | yuki.tanaka2 | azuki-adminpc | Mimic existing user |
+
+The evolution in naming strategy shows increased sophistication - while `support` might raise questions during an audit, `yuki.tanaka2` could easily be mistaken for a secondary account belonging to the legitimate user or a test account.
 
 **MITRE ATT&CK Reference:**
 - Create Account: Local Account (T1136.001)
@@ -420,7 +477,14 @@ The attacker created `yuki.tanaka2` to mimic the legitimate `yuki.tanaka` accoun
 
 **Analysis:**
 
-The attacker elevated the backdoor account to the Administrators group, ensuring full administrative control over the system.
+The attacker used a Base64-encoded PowerShell command to add the newly created backdoor account (`yuki.tanaka2`) to the local Administrators group. This two-step process (create account, then elevate) occurred within 15 seconds:
+
+| Timestamp | Action | Decoded Command |
+|-----------|--------|-----------------|
+| 4:51:08 AM | Create account | `net user yuki.tanaka2 B@ckd00r2024! /add` |
+| 4:51:23 AM | Elevate privileges | `net localgroup Administrators yuki.tanaka2 /add` |
+
+By adding the account to the Administrators group, the attacker ensures they have full administrative control over the system, enabling them to install additional tools, access sensitive data, and maintain persistent access even if other footholds are discovered.
 
 **MITRE ATT&CK Reference:**
 - Valid Accounts: Local Accounts (T1078.003)
@@ -455,7 +519,14 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker executed `qwinsta.exe` and `quser.exe` to enumerate active sessions and identify if their activity might be noticed.
+The attacker executed `qwinsta.exe` to enumerate active Remote Desktop sessions on the admin PC, followed by `quser.exe` to identify logged-on users. These commands were executed just 2 minutes after the initial lateral movement to azuki-adminpc (4:06 AM), as part of the discovery phase.
+
+| Command | Full Name | Information Revealed |
+|---------|-----------|---------------------|
+| `qwinsta` | Query Window Station | Session names, usernames, session IDs, state (active/disconnected) |
+| `quser` | Query User | Usernames, session names, logon time, idle time |
+
+This reconnaissance helps the attacker understand who is actively using the system, identify high-value targets, determine if their activity might be noticed, and decide optimal timing for further actions.
 
 **MITRE ATT&CK Reference:**
 - System Owner/User Discovery (T1033)
@@ -489,7 +560,20 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used `nltest.exe` to enumerate all domain trust relationships, revealing potential paths for lateral movement to other domains.
+The attacker used `nltest.exe` with the `/domain_trusts /all_trusts` parameters to enumerate all domain trust relationships. The command was executed twice within 13 seconds, possibly due to timeout or verification.
+
+| Parameter | Purpose |
+|-----------|---------|
+| `/domain_trusts` | Query domain trust relationships |
+| `/all_trusts` | Include all trust types (parent, child, external, forest) |
+
+This reconnaissance reveals:
+- Trusted domains and forests
+- Trust direction (inbound, outbound, bidirectional)
+- Trust types (parent-child, external, forest)
+- Potential paths for lateral movement to other domains
+
+The timing shows this was part of the early discovery phase, executed just 3 minutes after initial access (4:06 AM) and immediately after session enumeration (4:09 AM).
 
 **MITRE ATT&CK Reference:**
 - Domain Trust Discovery (T1482)
@@ -523,7 +607,30 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used `netstat -ano` to enumerate active network connections and their associated process IDs.
+The attacker used `netstat.exe` with the `-ano` flags to enumerate active network connections on the admin PC. The command-line arguments reveal the methodology:
+
+| Flag | Purpose |
+|------|---------|
+| `-a` | Display all connections and listening ports |
+| `-n` | Show addresses and port numbers in numerical form (no DNS resolution) |
+| `-o` | Display the owning process ID (PID) for each connection |
+
+This command provides the attacker with:
+- Active inbound and outbound connections
+- Listening services and their ports
+- Process IDs associated with each connection
+- Potential lateral movement targets on the network
+
+The timing shows this was part of the systematic discovery phase, executed approximately 4 minutes after initial access and following session and domain trust enumeration.
+
+**Discovery Sequence on azuki-adminpc:**
+
+| Timestamp | Command | Purpose |
+|-----------|---------|---------|
+| 4:08:58 AM | `qwinsta` | RDP session enumeration |
+| 4:09:07 AM | `quser` | User enumeration |
+| 4:09:25 AM | `nltest /domain_trusts /all_trusts` | Domain trust enumeration |
+| 4:10:07 AM | `netstat -ano` | Network connection enumeration |
 
 **MITRE ATT&CK Reference:**
 - System Network Connections Discovery (T1049)
@@ -558,7 +665,32 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker searched recursively for KeePass password database files (`.kdbx`) across all user directories.
+The attacker used the `where` command to recursively search for KeePass password database files across all user directories. The command-line arguments reveal the methodology:
+
+| Argument | Purpose |
+|----------|---------|
+| `/r` | Recursive search through subdirectories |
+| `C:\Users` | Starting directory (all user profiles) |
+| `*.kdbx` | KeePass database file extension |
+
+KeePass is a popular open-source password manager, and `.kdbx` files contain encrypted password vaults that may store credentials for:
+- Corporate applications and systems
+- Network devices and infrastructure
+- Cloud services and SaaS platforms
+- Backup server credentials
+- Personal accounts
+
+If the attacker finds a KeePass database and can obtain or crack the master password, they gain access to all stored credentials, potentially enabling further lateral movement and privilege escalation.
+
+**Discovery Timeline on azuki-adminpc:**
+
+| Timestamp | Command | Purpose |
+|-----------|---------|---------|
+| 4:08:58 AM | `qwinsta` | RDP session enumeration |
+| 4:09:07 AM | `quser` | User enumeration |
+| 4:09:25 AM | `nltest /domain_trusts /all_trusts` | Domain trust enumeration |
+| 4:10:07 AM | `netstat -ano` | Network connection enumeration |
+| 4:13:45 AM | `where /r C:\Users *.kdbx` | Password database search |
 
 **MITRE ATT&CK Reference:**
 - Unsecured Credentials: Credentials In Files (T1552.001)
@@ -594,7 +726,20 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker discovered a plaintext password file on the user's desktop. This represents a critical security hygiene failure.
+The attacker discovered and opened a plaintext password file named `OLD-Passwords.txt` on the user's desktop. This represents a critical security hygiene failure - storing passwords in unencrypted text files. The "OLD" prefix suggests these may be legacy credentials that users often forget to delete, but they could still provide access to systems where passwords haven't been rotated.
+
+**Bonus Findings - Additional Credential Theft Activity:**
+
+The query results reveal extensive credential collection activity:
+
+| Timestamp | Command | Data Collected |
+|-----------|---------|----------------|
+| 4:15:52 AM | `notepad.exe OLD-Passwords.txt` | Legacy password file |
+| 4:39:16 AM | `tar.exe -czf credentials.tar.gz Azuki-Passwords.kdbx KeePass-Master-Password.txt` | KeePass database + master password |
+| 4:48:25 AM | `tar.exe -czf chrome-credentials.tar.gz chrome-creds.txt Chrome-Login-Data.db` | Chrome saved passwords |
+| 5:56:42 AM | `tar.exe -czf chrome-session-theft.tar.gz chrome-real-dump.txt Chrome-Cookies.db` | Chrome session cookies |
+
+This reveals a catastrophic security failure - not only was there a KeePass database, but the master password was stored in a plaintext file (`KeePass-Master-Password.txt`) alongside it, completely defeating the purpose of using a password manager.
 
 **MITRE ATT&CK Reference:**
 - Unsecured Credentials: Credentials In Files (T1552.001)
@@ -641,7 +786,17 @@ DeviceFileEvents
 
 **Analysis:**
 
-The attacker used `C:\ProgramData\Microsoft\Crypto\staging` to stage stolen data, mimicking legitimate Windows cryptographic service directories.
+The attacker established `C:\ProgramData\Microsoft\Crypto\staging` as the data staging directory on the CEO's admin PC. This path was strategically chosen to mimic legitimate Windows cryptographic service directories, making it less suspicious during casual inspection.
+
+**Staging Directory Comparison Across Parts:**
+
+| Part | Device | Staging Directory | Strategy |
+|------|--------|-------------------|----------|
+| Part 1 | AZUKI-SL | C:\ProgramData\WindowsCache | Custom hidden folder |
+| Part 2 | azuki-fileserver01 | C:\Windows\Logs\CBS | Abuse existing Windows folder |
+| Part 3 | azuki-adminpc | C:\ProgramData\Microsoft\Crypto\staging | Mimic legitimate crypto service |
+
+The attacker used `robocopy.exe` for copying existing zip files and `tar.exe` for creating new compressed archives, demonstrating continued use of living-off-the-land techniques.
 
 **MITRE ATT&CK Reference:**
 - Data Staged: Local Data Staging (T1074.001)
@@ -676,7 +831,25 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used `Robocopy.exe` with flags optimized for speed (`/R:1 /W:1`) and stealth (`/NP`) to copy banking documents.
+The attacker used `Robocopy.exe` (Robust File Copy) to systematically copy sensitive business data to the staging directory. The command-line flags reveal a methodology optimized for speed and reliability:
+
+| Flag | Purpose |
+|------|---------|
+| `/E` | Copy subdirectories, including empty ones |
+| `/R:1` | Retry only 1 time on failed copies (default is 1 million) |
+| `/W:1` | Wait only 1 second between retries (default is 30 seconds) |
+| `/NP` | No progress - don't display percentage copied (stealth) |
+
+The `/R:1` and `/W:1` flags are significant - they reduce the default retry behavior to minimize time spent on locked or inaccessible files, allowing the attacker to quickly move through large datasets without getting stuck.
+
+**Data Collection Sequence:**
+
+| Timestamp | Source Folder | Data Type |
+|-----------|---------------|-----------|
+| 4:28:09 AM | Documents\QuickBooks | Financial/Accounting |
+| 4:37:03 AM | Documents\Banking | Banking records |
+| 4:37:22 AM | Documents\Tax-Records | Tax documents |
+| 4:37:38 AM | Documents\Contracts | Business contracts |
 
 **MITRE ATT&CK Reference:**
 - Automated Collection (T1119)
@@ -708,6 +881,19 @@ DeviceFileEvents
 | Field | Value |
 |-------|-------|
 | Total Archives | 8 |
+
+**Analysis:**
+
+The attacker created 8 archives in the staging directory, representing a comprehensive theft of sensitive business data. The stolen data spans multiple categories:
+
+| Category | Archives | Business Impact |
+|----------|----------|-----------------|
+| Financial/Banking | 2 | Banking records, QuickBooks accounting data |
+| Tax Records | 2 | Tax documents and supporting documentation |
+| Business Contracts | 3 | Contract archives from 2022, 2023, and current |
+| Credentials | 1 | Passwords and authentication data |
+
+This volume of data theft aligns with the incident brief, mentioning that the competitor undercut Azuki's 6-year shipping contract by exactly 3% - the attacker had access to pricing data, contracts, and financial records that would enable precise competitive intelligence.
 
 **MITRE ATT&CK Reference:**
 - Archive Collected Data: Archive via Utility (T1560.001)
@@ -741,7 +927,21 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker downloaded a second archive containing Mimikatz approximately 1.5 hours after the initial malware deployment.
+Approximately 1.5 hours after the initial malware deployment, the attacker downloaded a second archive (`m-temp.7z`) from the same hosting infrastructure (litter.catbox.moe). The filename `m-temp` suggests this is a temporary copy of Mimikatz (`m.exe`), a well-known credential theft tool.
+
+The attacker reused the same infrastructure and download technique:
+
+| Flag | Time | File | Source |
+|------|------|------|--------|
+| Flag 5 | 4:21:11 AM | KB5044273-x64.7z | litter.catbox.moe |
+| Flag 20 | 5:55:34 AM | m-temp.7z | litter.catbox.moe |
+
+From Flag 7 results, we know the tool lifecycle:
+- **5:55:34 AM** - Downloaded m-temp.7z
+- **5:55:44 AM** - Extracted m.exe
+- **5:57:02 AM** - Deleted m.exe (after use)
+
+This rapid download-use-delete pattern (~90 seconds) demonstrates anti-forensic discipline, minimizing the window during which the credential theft tool exists on disk.
 
 **MITRE ATT&CK Reference:**
 - Ingress Tool Transfer (T1105)
@@ -776,7 +976,28 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used Mimikatz with the `dpapi::chrome` module to extract saved credentials from Google Chrome.
+The attacker used Mimikatz (`m.exe`) with the `dpapi::chrome` module to extract saved credentials from Google Chrome. The command-line arguments reveal the methodology:
+
+| Argument | Purpose |
+|----------|---------|
+| `privilege::debug` | Enable debug privileges (required for DPAPI access) |
+| `dpapi::chrome` | Mimikatz module for Chrome credential extraction |
+| `/in:%localappdata%\Google\Chrome\User Data\Default\Login Data` | Path to Chrome's encrypted password database |
+| `/unprotect` | Decrypt the credentials using DPAPI |
+| `exit` | Close Mimikatz after execution |
+
+Chrome stores saved passwords in an SQLite database (`Login Data`), encrypted with Windows DPAPI (Data Protection API). Mimikatz can decrypt these credentials when running in the context of the user who saved them, as DPAPI keys are tied to the user's Windows credentials.
+
+**Credential Theft Timeline:**
+
+| Timestamp | Activity |
+|-----------|----------|
+| 5:55:34 AM | Downloaded m-temp.7z |
+| 5:55:44 AM | Extracted m.exe |
+| 5:55:54 AM | Executed Chrome credential theft |
+| 5:57:02 AM | Deleted m.exe |
+
+The entire credential theft operation was completed in under 90 seconds, demonstrating operational efficiency and anti-forensic awareness.
 
 **MITRE ATT&CK Reference:**
 - Credentials from Password Stores: Credentials from Web Browsers (T1555.003)
@@ -814,6 +1035,27 @@ DeviceProcessEvents
 | 4:49:19 AM | chrome-credentials.tar.gz | gofile.io |
 | 5:56:50 AM | chrome-session-theft.tar.gz | gofile.io |
 
+**Analysis:**
+
+The attacker used `curl.exe` with form-based POST requests to exfiltrate stolen data to `gofile.io`, an anonymous file sharing service. The command-line arguments reveal the methodology:
+
+| Argument | Purpose |
+|----------|---------|
+| `-X POST` | Specify HTTP POST method |
+| `-F file=@` | Form-based file upload (multipart/form-data) |
+| `https://store1.gofile.io/uploadFile` | Anonymous file hosting API endpoint |
+
+**Exfiltration Service Comparison Across Parts:**
+
+| Part | Service | Method |
+|------|---------|--------|
+| Part 1 | Discord webhooks | curl.exe -F |
+| Part 2 | file.io | curl.exe -F |
+| Part 3 | gofile.io | curl.exe -X POST -F |
+
+The attacker continues to rotate exfiltration infrastructure while maintaining consistent techniques (curl.exe with form uploads), demonstrating operational discipline.
+
+
 **MITRE ATT&CK Reference:**
 - Exfiltration Over Web Service (T1567)
 
@@ -838,7 +1080,17 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used `gofile.io`, an anonymous file-sharing service, demonstrating continued rotation of exfiltration infrastructure across parts.
+The attacker used `gofile.io`, an anonymous file-sharing service, to exfiltrate stolen data. This service is favored by attackers because it requires no authentication or account registration, provides temporary file hosting with self-destructing links, offers generous file size limits, uses HTTPS encryption to mask data transfers, and is a legitimate service unlikely to be blocked by corporate firewalls.
+
+**Exfiltration Services Across All Parts:**
+
+| Part | Service | Characteristics |
+|------|---------|-----------------|
+| Part 1 | Discord webhooks | Webhook-based upload, blends with collaboration traffic |
+| Part 2 | file.io | Anonymous, one-time download links |
+| Part 3 | gofile.io | Anonymous, temporary hosting, large file support |
+
+The rotation of exfiltration services demonstrates the attacker's operational security awareness - by using different platforms in each phase, they reduce the risk of detection through network monitoring and make it harder for defenders to build comprehensive blocklists.
 
 **MITRE ATT&CK Reference:**
 - Exfiltration Over Web Service: Exfiltration to Cloud Storage (T1567.002)
@@ -869,6 +1121,20 @@ DeviceNetworkEvents
 |-------|-------|
 | Remote IP | 45.112.123.227 |
 | Remote URL | store1.gofile.io |
+
+**Analysis:**
+
+The stolen data was exfiltrated to IP address `45.112.123.227`, which resolves to `store1.gofile.io`. This IP belongs to a cloud hosting provider that gofile.io uses for file storage.
+
+**Network IOCs for Exfiltration:**
+
+| Part | Service | IP Address |
+|------|---------|------------|
+| Part 1 | Discord webhooks | (Discord CDN IPs) |
+| Part 2 | file.io | (file.io infrastructure) |
+| Part 3 | gofile.io | 45.112.123.227 |
+
+While domain-based blocking can be bypassed using IP addresses directly, having the IP provides an additional layer for network-based detection and blocking. This IP can be added to firewall blocklists and used for threat intelligence correlation to identify related attacks.
 
 **MITRE ATT&CK Reference:**
 - Exfiltration Over Web Service: Exfiltration to Cloud Storage (T1567.002)
@@ -903,7 +1169,7 @@ DeviceFileEvents
 
 **Analysis:**
 
-The attacker discovered and exfiltrated `KeePass-Master-Password.txt`, which contains the master password for the KeePass password database. This represents a catastrophic security failure - storing a password manager's master password in a plaintext file alongside the database completely defeats the purpose of using a password manager.
+The attacker discovered and exfiltrated `KeePass-Master-Password.txt`, which contains the master password for the KeePass password database (`Azuki-Passwords.kdbx`). This represents a catastrophic security failure - storing a password manager's master password in a plaintext file alongside the database completely defeats the purpose of using a password manager.
 
 With both the KeePass database and its master password, the attacker now has access to all credentials stored within, potentially including:
 - Corporate application credentials
@@ -911,7 +1177,7 @@ With both the KeePass database and its master password, the attacker now has acc
 - Cloud service accounts
 - Backup server credentials
 - Personal accounts
-
+- 
 **MITRE ATT&CK Reference:**
 - Credentials from Password Stores: Password Managers (T1555.005)
 
