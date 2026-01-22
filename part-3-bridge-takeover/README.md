@@ -1,8 +1,10 @@
 # THE AZUKI BREACH SAGA - Part 3: Bridge Takeover
 
+<img width="740" height="1110" alt="image" src="https://github.com/user-attachments/assets/db319807-9d6c-4e96-9490-142e2390f973" />
+
 ## Executive Summary
 
-This report documents the findings from Part 3 of the threat hunting investigation conducted on Azuki Import/Export Trading Co. Two days after the file server breach (November 22), threat actors returned on November 25 and pivoted from the compromised IT workstation to the CEO's administrative PC (azuki-adminpc). The attacker deployed sophisticated tools including Meterpreter (Metasploit C2 beacon) and a custom implant named "silentlynx.exe"; directly linking this intrusion to the JADE SPIDER threat actor.
+This report documents the findings from Part 3 of the threat hunting investigation conducted on Azuki Import/Export Trading Co. Two days after the file server breach (November 22), threat actors returned on November 25 and pivoted from the compromised IT workstation to the CEO's administrative PC (azuki-adminpc). The attacker deployed sophisticated tools, including Meterpreter (Metasploit C2 beacon) and a custom implant named `silentlynx.exe`, directly linking this intrusion to the JADE SPIDER threat actor.
 
 The investigation revealed extensive credential theft targeting browser-saved passwords, KeePass password databases, and plaintext password files. The attacker exfiltrated 8 archives containing financial records, banking information, tax documents, business contracts, and credentials to an anonymous file sharing service (gofile.io).
 
@@ -61,6 +63,8 @@ DeviceLogonEvents
 | project TimeGenerated, DeviceName, AccountName, RemoteIP, RemoteDeviceName, LogonType
 ```
 
+<img width="1200" alt="1 2 3" src="https://github.com/user-attachments/assets/7882d474-58fa-4223-a7cc-80670b21f685" />
+
 **Finding:**
 
 | Field | Value |
@@ -89,6 +93,9 @@ The lateral movement to the CEO's admin PC originated from IP address 10.1.0.204
 **Objective:** Identify the compromised account used for lateral movement.
 
 **Reference:** This finding was derived from the same query results as Flag 1.
+
+<img width="1200" alt="1 2 3" src="https://github.com/user-attachments/assets/7882d474-58fa-4223-a7cc-80670b21f685" />
+
 
 **Finding:**
 
@@ -125,6 +132,8 @@ The attacker used the `yuki.tanaka` account for lateral movement to the CEO's ad
 
 **Reference:** This finding was derived from the same query results as Flag 1.
 
+<img width="1200" alt="1 2 3" src="https://github.com/user-attachments/assets/7882d474-58fa-4223-a7cc-80670b21f685" />
+
 **Finding:**
 
 | Field | Value |
@@ -135,7 +144,7 @@ The attacker used the `yuki.tanaka` account for lateral movement to the CEO's ad
 
 **Analysis:**
 
-The attacker moved laterally to `azuki-adminpc`, which based on the naming convention is the CEO's administrative workstation. This represents a significant escalation in the attack, as executive workstations typically contain highly sensitive business information including strategic documents, financial data, confidential communications, and password databases.
+The attacker moved laterally to `azuki-adminpc`, which, based on the naming convention, is the CEO's administrative workstation. This represents a significant escalation in the attack, as executive workstations typically contain highly sensitive business information including strategic documents, financial data, confidential communications, and password databases.
 
 **Compromised Systems Across All Parts:**
 
@@ -168,6 +177,8 @@ DeviceNetworkEvents
 | project TimeGenerated, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RemoteUrl, RemoteIP
 ```
 
+<img width="1200" alt="4 5" src="https://github.com/user-attachments/assets/61b3b385-100e-4919-982c-d57fa5588b11" />
+
 **Finding:**
 
 | Field | Value |
@@ -194,6 +205,8 @@ The attacker used `litter.catbox.moe`, an anonymous file hosting service, to sta
 **Objective:** Identify the command used to download the malicious archive.
 
 **Reference:** This finding was derived from the same query results as Flag 4.
+
+<img width="1200" alt="4 5" src="https://github.com/user-attachments/assets/61b3b385-100e-4919-982c-d57fa5588b11" />
 
 **Finding:**
 
@@ -229,6 +242,8 @@ DeviceProcessEvents
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
 
+<img width="1200" alt="6" src="https://github.com/user-attachments/assets/3a44b0de-968f-45f3-b343-7030af4b4e5f" />
+
 **Finding:**
 
 | Field | Value |
@@ -263,6 +278,8 @@ DeviceFileEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, InitiatingProcessFileName
 ```
+
+<img width="1200" alt="7" src="https://github.com/user-attachments/assets/4b8d8fba-695b-40cc-9797-8def065c7716" />
 
 **Finding:**
 
@@ -300,6 +317,8 @@ DeviceEvents
 | project TimeGenerated, ActionType, PipeName, InitiatingProcessFileName, InitiatingProcessAccountName
 ```
 
+<img width="1200" alt="8" src="https://github.com/user-attachments/assets/47e6b0fe-0e44-426f-b104-aaf8a2505915" />
+
 **Finding:**
 
 | Field | Value |
@@ -335,6 +354,8 @@ DeviceProcessEvents
 | project TimeGenerated, AccountName, ProcessCommandLine
 ```
 
+<img width="1200" alt="9 10 11" src="https://github.com/user-attachments/assets/cbd397f1-43bd-4969-8bb1-082c8a4cdd81" />
+
 **Finding:**
 
 | Timestamp | Encoded Command | Decoded Command |
@@ -359,6 +380,8 @@ The attacker used Base64-encoded PowerShell commands to obfuscate account creati
 **Objective:** Identify the backdoor account name.
 
 **Reference:** This finding was derived from the decoded Base64 commands in Flag 9.
+
+<img width="1200" alt="9 10 11" src="https://github.com/user-attachments/assets/cbd397f1-43bd-4969-8bb1-082c8a4cdd81" />
 
 **Finding:**
 
@@ -385,6 +408,8 @@ The attacker created `yuki.tanaka2` to mimic the legitimate `yuki.tanaka` accoun
 **Objective:** Identify the decoded Base64 command for privilege escalation.
 
 **Reference:** This finding was derived from the same query results as Flag 9.
+
+<img width="1200" alt="9 10 11" src="https://github.com/user-attachments/assets/cbd397f1-43bd-4969-8bb1-082c8a4cdd81" />
 
 **Finding:**
 
@@ -419,6 +444,8 @@ DeviceProcessEvents
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
 
+<img width="1200" alt="12" src="https://github.com/user-attachments/assets/d1e5030a-482f-4f1e-acaa-a44dabe4f548" />
+
 **Finding:**
 
 | Timestamp | Command | Purpose |
@@ -451,6 +478,8 @@ DeviceProcessEvents
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
 
+<img width="1200" alt="13" src="https://github.com/user-attachments/assets/9d94613e-4e8f-49e2-8d7b-b45be5bd0ae5" />
+
 **Finding:**
 
 | Field | Value |
@@ -482,6 +511,8 @@ DeviceProcessEvents
 | order by TimeGenerated asc
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
+
+<img width="1200" alt="14" src="https://github.com/user-attachments/assets/60376de7-1752-4a2f-94c3-fc97e953cd3d" />
 
 **Finding:**
 
@@ -516,6 +547,8 @@ DeviceProcessEvents
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
 
+<img width="1200" alt="15" src="https://github.com/user-attachments/assets/be1feb18-4fe6-4c3b-be60-c3d0f86116f0" />
+
 **Finding:**
 
 | Field | Value |
@@ -548,6 +581,8 @@ DeviceProcessEvents
 | order by TimeGenerated asc 
 | project TimeGenerated, ActionType, FileName, FolderPath, InitiatingProcessCommandLine, ProcessCommandLine
 ```
+
+<img width="1200" alt="16" src="https://github.com/user-attachments/assets/a9321719-7d3c-4b26-b4e5-769cf082a57c" />
 
 **Finding:**
 
@@ -582,6 +617,8 @@ DeviceFileEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, InitiatingProcessFileName
 ```
+
+<img width="1200" alt="17" src="https://github.com/user-attachments/assets/68ef64c9-f6c4-4c3c-b292-d96a56c83921" />
 
 **Finding:**
 
@@ -628,6 +665,8 @@ DeviceProcessEvents
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
 
+<img width="1200" alt="18" src="https://github.com/user-attachments/assets/885a2659-471c-445f-addf-733d65691fdc" />
+
 **Finding:**
 
 | Field | Value |
@@ -662,6 +701,8 @@ DeviceFileEvents
 | summarize Count = count(), Archives = make_set(FileName)
 ```
 
+<img width="1200" alt="19" src="https://github.com/user-attachments/assets/75ff38ed-2100-4838-9bfa-9ba9982d8946" />
+
 **Finding:**
 
 | Field | Value |
@@ -688,6 +729,8 @@ DeviceProcessEvents
 | order by TimeGenerated asc
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
+
+<img width="1200" alt="20" src="https://github.com/user-attachments/assets/7dfd5af4-a3d2-46c7-a810-0d346db429a4" />
 
 **Finding:**
 
@@ -722,6 +765,8 @@ DeviceProcessEvents
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
 
+<img width="1200" alt="21" src="https://github.com/user-attachments/assets/c46d0803-06c0-4d8e-8707-9aa17e7c1866" />
+
 **Finding:**
 
 | Field | Value |
@@ -755,6 +800,8 @@ DeviceProcessEvents
 | project TimeGenerated, AccountName, FileName, ProcessCommandLine
 ```
 
+<img width="1200" alt="22" src="https://github.com/user-attachments/assets/8425b472-3830-4a31-9f85-445135d8c44f" />
+
 **Finding:**
 
 | Timestamp | Archive | Destination |
@@ -780,6 +827,8 @@ DeviceProcessEvents
 
 **Reference:** This finding was derived from the same query results as Flag 22.
 
+<img width="1200" alt="22" src="https://github.com/user-attachments/assets/e902c317-f9fb-4853-9f14-c3ad55a2860d" />
+
 **Finding:**
 
 | Field | Value |
@@ -789,7 +838,7 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used `gofile.io`, an anonymous file sharing service, demonstrating continued rotation of exfiltration infrastructure across parts.
+The attacker used `gofile.io`, an anonymous file-sharing service, demonstrating continued rotation of exfiltration infrastructure across parts.
 
 **MITRE ATT&CK Reference:**
 - Exfiltration Over Web Service: Exfiltration to Cloud Storage (T1567.002)
@@ -811,6 +860,8 @@ DeviceNetworkEvents
 | order by TimeGenerated asc
 | project TimeGenerated, RemoteUrl, RemoteIP, InitiatingProcessFileName, InitiatingProcessCommandLine
 ```
+
+<img width="1200" alt="24" src="https://github.com/user-attachments/assets/42c966fa-6aaf-4606-a623-9928738d18b6" />
 
 **Finding:**
 
@@ -839,6 +890,8 @@ DeviceFileEvents
 | order by TimeGenerated asc
 | project TimeGenerated, ActionType, FileName, FolderPath, InitiatingProcessFileName, InitiatingProcessCommandLine
 ```
+
+<img width="1200" alt="25" src="https://github.com/user-attachments/assets/15885af7-57da-46a1-9641-49d3f800fa50" />
 
 **Finding:**
 
