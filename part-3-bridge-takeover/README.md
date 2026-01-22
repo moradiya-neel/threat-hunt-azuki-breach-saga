@@ -18,7 +18,7 @@ The investigation revealed extensive credential theft targeting browser-saved pa
 |-------|--------|
 | Company | Azuki Import/Export Trading Co. (梓貿易株式会社) |
 | Situation | Two days after the file server breach, threat actors returned with sophisticated tools and pivoted to the CEO's administrative PC, deploying persistent backdoors and exfiltrating sensitive business data |
-| Compromised Systems | azuki-sl (beachhead), azuki-fileserver01 (file server), azuki-adminpc (CEO PC) |
+| Compromised Systems | azuki-sl (breachhead), azuki-fileserver01 (file server), azuki-adminpc (CEO PC) |
 | Evidence Available | Microsoft Defender for Endpoint logs (via Azure Log Analytics) |
 
 ### Investigation Scope
@@ -78,7 +78,7 @@ DeviceLogonEvents
 
 **Analysis:**
 
-The lateral movement to the CEO's admin PC originated from IP address 10.1.0.204, which is the IT admin workstation (azuki-sl) compromised during Part 1. This confirms that azuki-sl continues to serve as the attacker's primary beachhead for pivoting to other systems within the network. The attacker accessed the admin PC multiple times throughout the morning (4:06 AM, 4:31 AM, 5:21 AM, 6:06 AM), suggesting phased operations to avoid detection or accommodate large data transfers.
+The lateral movement to the CEO's admin PC originated from IP address 10.1.0.204, which is the IT admin workstation (azuki-sl) compromised during Part 1. This confirms that azuki-sl continues to serve as the attacker's primary breachhead for pivoting to other systems within the network. The attacker accessed the admin PC multiple times throughout the morning (4:06 AM, 4:31 AM, 5:21 AM, 6:06 AM), suggesting phased operations to avoid detection or accommodate large data transfers.
 
 **MITRE ATT&CK Reference:**
 - Lateral Movement (TA0008)
@@ -108,7 +108,7 @@ The lateral movement to the CEO's admin PC originated from IP address 10.1.0.204
 
 **Analysis:**
 
-The attacker used the `yuki.tanaka` account for lateral movement to the CEO's admin PC. This is a new compromised account not seen in Parts 1 or 2, where the attacker primarily used `kenji.sato` and `fileadmin`. The credentials were likely obtained from the `IT-Admin-Passwords.csv` file discovered on the file server during Part 2.
+The attacker used the `yuki.tanaka` account for lateral movement to the CEO's admin PC. This is a new compromised account not seen in Parts 1 or 2, where the attacker primarily used `kenji.sato` and `fileadmin`. The credentials were likely obtained from the `IT-Admin-Passwords.csv` file, which was discovered on the file server during Part 2.
 
 **Compromised Accounts Across All Parts:**
 
@@ -150,7 +150,7 @@ The attacker moved laterally to `azuki-adminpc`, which, based on the naming conv
 
 | Part | Device | Role |
 |------|--------|------|
-| Part 1 | azuki-sl | IT admin workstation (beachhead) |
+| Part 1 | azuki-sl | IT admin workstation (breachhead) |
 | Part 2 | azuki-fileserver01 | File server |
 | Part 3 | azuki-adminpc | CEO/Admin PC |
 
@@ -1037,7 +1037,7 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used `curl.exe` with form-based POST requests to exfiltrate stolen data to `gofile.io`, an anonymous file sharing service. The command-line arguments reveal the methodology:
+The attacker used `curl.exe` with form-based POST requests to exfiltrate stolen data to `gofile.io`, an anonymous file-sharing service. The command-line arguments reveal the methodology:
 
 | Argument | Purpose |
 |----------|---------|
@@ -1177,7 +1177,7 @@ With both the KeePass database and its master password, the attacker now has acc
 - Cloud service accounts
 - Backup server credentials
 - Personal accounts
-- 
+
 **MITRE ATT&CK Reference:**
 - Credentials from Password Stores: Password Managers (T1555.005)
 
