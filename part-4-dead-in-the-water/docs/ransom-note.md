@@ -1,5 +1,7 @@
 ## Ransom Note
 
+[Access by Organizer](https://www.notion.so/RANSOM-NOTE-2b8cf57416ff8002aea5d5d7d9d60221)
+
 <img width="711" alt="Screenshot 2026-01-22 at 4 08 49 PM" src="https://github.com/user-attachments/assets/9e4dff89-e8de-47b1-84fe-d4aa3895163f" />
 
 <img width="711" height="933" alt="Screenshot 2026-01-22 at 4 00 25 PM" src="https://github.com/user-attachments/assets/9e735f3e-a281-4574-8258-d18a4807fba5" />
