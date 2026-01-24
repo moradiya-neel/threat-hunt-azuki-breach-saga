@@ -765,38 +765,7 @@ DeviceProcessEvents
 
 The attacker used `PsExec64.exe` (Sysinternals remote execution tool) to deploy the `silentlynx.exe` implant across multiple systems. The deployment was launched from azuki-adminpc using credentials stolen throughout the intrusion.
 
-**PsExec Deployment Sequence:**
-
-| Timestamp | Target IP | Target System | Credential Used | Payload |
-|-----------|-----------|---------------|-----------------|---------|
-| 5:58:35 AM | - | Local | yuki.tanaka | `/accepteula` (first run) |
-| 6:03:47 AM | 10.1.0.102 | Unknown workstation | kenji.sato | silentlynx.exe |
-| 6:04:40 AM | 10.1.0.188 | azuki-fileserver01 | fileadmin | silentlynx.exe |
-| 6:05:46 AM | 10.1.0.204 | azuki-sl | kenji.sato | silentlynx.exe |
-
-> **Note:** 10.1.0.102 was later identified as azuki-logistics, a logistics workstation that received the silentlynx.exe payload but was outside the primary investigation scope.
-
-**PsExec Command Breakdown:**
-
-| Argument | Purpose |
-|----------|---------|
-| `\\10.1.0.xxx` | Target system IP address |
-| `-u username` | Run as specified user |
-| `-p **********` | Password (redacted in logs) |
-| `-c` | Copy the executable to remote system |
-| `-f` | Force copy even if file exists |
-| `silentlynx.exe` | JADE SPIDER custom implant |
-
-**Key Observations:**
-
-1. **Credential Reuse** - The attacker used credentials stolen across multiple parts:
-   - `kenji.sato` (compromised in Part 1)
-   - `fileadmin` (compromised in Part 2)
-
-2. **Implant Deployment** - `silentlynx.exe` (JADE SPIDER's custom implant) was deployed to all Windows systems
-
 **MITRE ATT&CK Reference:**
-- Remote Services: SMB/Windows Admin Shares (T1021.002)
 - Lateral Tool Transfer (T1570)
 
 **Flag Answer:** `PsExec64.exe`
@@ -850,6 +819,9 @@ The attacker used PsExec64.exe to remotely deploy the `silentlynx.exe` implant t
 
 This demonstrates the attacker leveraging stolen credentials from earlier phases to spread laterally across the entire network.
 
+> **Note:** 10.1.0.102 was later identified as azuki-logistics, a logistics workstation that received the silentlynx.exe payload but was outside the primary investigation scope.
+
+
 **MITRE ATT&CK Reference:**
 - Remote Services: SMB/Windows Admin Shares (T1021.002)
 - Lateral Tool Transfer (T1570)
@@ -876,14 +848,6 @@ This demonstrates the attacker leveraging stolen credentials from earlier phases
 **Analysis:**
 
 The attacker deployed `silentlynx.exe` - the custom JADE SPIDER implant - across all Windows systems in the network. This is the same implant discovered in Part 3 (Flag 7) that was extracted from the `KB5044273-x64.7z` archive.
-
-**Deployment Summary:**
-
-| Target IP | Target System | Payload Deployed |
-|-----------|---------------|------------------|
-| 10.1.0.102 | Unknown workstation | silentlynx.exe |
-| 10.1.0.188 | azuki-fileserver01 | silentlynx.exe |
-| 10.1.0.204 | azuki-sl | silentlynx.exe |
 
 **silentlynx.exe Lifecycle:**
 
@@ -937,15 +901,6 @@ DeviceProcessEvents
 **Analysis:**
 
 The attacker used `net stop VSS /y` to stop the Volume Shadow Copy Service (VSS) on Windows systems. This service creates point-in-time snapshots that could be used for file recovery, so disabling it is a critical step before ransomware encryption.
-
-**VSS Stop Sequence Across Systems:**
-
-| Timestamp | Device | Account | Command |
-|-----------|--------|---------|---------|
-| 6:04:53 AM | azuki-adminpc | yuki.tanaka | `"net" stop VSS /y` |
-| 6:04:53 AM | azuki-adminpc | yuki.tanaka | `net1 stop VSS /y` |
-| 6:07:03 AM | azuki-sl | kenji.sato | `"net" stop VSS /y` |
-| 6:07:03 AM | azuki-sl | kenji.sato | `net1 stop VSS /y` |
 
 **Command Breakdown:**
 
@@ -1319,16 +1274,6 @@ With recovery disabled:
 - System restore points cannot be accessed via the recovery environment
 - Users cannot boot into Windows Recovery Environment (WinRE)
 
-**Complete Recovery Inhibition Summary:**
-
-| Technique | Command | Effect |
-|-----------|---------|--------|
-| Delete shadow copies | `vssadmin delete shadows /all /quiet` | Remove existing recovery points |
-| Limit shadow storage | `vssadmin resize shadowstorage /maxsize=401MB` | Prevent new recovery points |
-| Delete backup catalog | `wbadmin delete catalog -quiet` | Remove backup history |
-| WMI shadow deletion | `wmic shadowcopy delete /nointeractive` | Redundant shadow removal |
-| Disable recovery | `bcdedit /set {default} recoveryenabled No` | Disable Windows Recovery Environment |
-
 **MITRE ATT&CK Reference:**
 - Inhibit System Recovery (T1490)
 
@@ -1383,18 +1328,6 @@ Without the catalog:
 - Administrators lose visibility into backup history
 - Recovery requires manual reconstruction of backup locations
 
-**Complete Recovery Inhibition Attack Chain:**
-
-| Step | Timestamp | Command | Purpose |
-|------|-----------|---------|---------|
-| 1 | 5:58:55 AM | `vssadmin delete shadows /all /quiet` | Delete shadow copies |
-| 2 | 5:59:56 AM | `vssadmin resize shadowstorage /maxsize=401MB` | Limit shadow storage |
-| 3 | 6:04:59 AM | `bcdedit /set {default} recoveryenabled No` | Disable recovery environment |
-| 4 | 6:04:59 AM | `wbadmin delete catalog -quiet` | Delete backup catalog |
-| 5 | 6:07:08 AM | `wmic shadowcopy delete /nointeractive` | WMI shadow deletion |
-
-The attacker systematically eliminated every possible recovery option before deploying the ransomware encryption.
-
 **MITRE ATT&CK Reference:**
 - Inhibit System Recovery (T1490)
 
@@ -1428,7 +1361,7 @@ DeviceRegistryEvents
 |-------|-------|
 | Timestamp | November 25, 2025, 6:05:01 AM |
 | Device | azuki-adminpc |
-| Registry Key | HKEY_CURRENT_USER\...\Software\Microsoft\Windows\CurrentVersion\Run |
+| Registry Key | HKEY_CURRENT_USER\S-1-5-21-1893365723-3474686573-4097541393-500\Software\Microsoft\Windows\CurrentVersion\Run |
 | Registry Value Name | WindowsSecurityHealth |
 | Registry Value Data | C:\Windows\Temp\cache\silentlynx.exe |
 
@@ -1457,7 +1390,7 @@ Both names are crafted to appear legitimate:
 
 **Registry Key Location:**
 
-The `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run` key ensures:
+The `HKEY_CURRENT_USER\S-1-5-21-1893365723-3474686573-4097541393-500\Software\Microsoft\Windows\CurrentVersion\Run` key ensures:
 - Programs execute automatically when the user logs in
 - No administrator privileges required to set
 - Survives system reboots
@@ -1566,7 +1499,7 @@ DeviceProcessEvents
 | project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine
 ```
 
-<img width="1200"" alt="25" src="https://github.com/user-attachments/assets/6b3e1426-ea9d-49e9-82aa-e1ebce52b9b9" />
+<img width="1200" alt="25" src="https://github.com/user-attachments/assets/9be58775-37eb-4cf7-889e-43c1f8ac9f66" />
 
 **Finding:**
 
@@ -1680,32 +1613,6 @@ The ransom notes were placed in:
 - **Documents** - Visible when accessing files
 
 This ensures victims cannot miss the ransom demands regardless of which folder they access first.
-
-**Ransom Note Details (from incident brief):**
-
-| Field | Value |
-|-------|-------|
-| Threat Actor | SilentLynx Security Team |
-| Affiliate ID | SL-AFF-2847 |
-| Victim Key | AZUKI-BC844-1127 |
-| Encryption | AES-256-GCM |
-| File Extension | .lynx |
-| Files Encrypted | 847,293 |
-| Ransom Demand | $850,000 USD in Monero |
-| Deadline | 72 hours |
-
-**Complete Attack Timeline:**
-
-| Timestamp | Event |
-|-----------|-------|
-| Nov 25, 5:39 AM | SSH to backup server |
-| Nov 25, 5:47 AM | Backup destruction |
-| Nov 25, 5:58 AM | Shadow copy deletion begins |
-| Nov 25, 6:03 AM | PsExec deployment begins |
-| Nov 25, 6:05 AM | Ransom note dropped (azuki-adminpc) |
-| Nov 25, 6:07 AM | Ransom note dropped (azuki-sl) |
-| Nov 25, 6:10 AM | USN journal deleted |
-| Nov 27, 5:48 AM | Encryption completed |
 
 **MITRE ATT&CK Reference:**
 - Data Encrypted for Impact (T1486)
