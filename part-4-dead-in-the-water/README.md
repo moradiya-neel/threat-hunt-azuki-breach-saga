@@ -174,17 +174,6 @@ DeviceNetworkEvents
 
 The SSH connection to the backup server originated from IP address 10.1.0.108 (azuki-adminpc), which is the CEO's administrative PC compromised in Part 3. The connection was made on port 22 (standard SSH), confirming the use of SSH for lateral movement to the Linux backup server.
 
-**Attack Path:**
-
-| Part | Source | Target |
-|------|--------|--------|
-| Part 1 | External | azuki-sl (10.1.0.204) |
-| Part 2 | azuki-sl (10.1.0.204) | azuki-fileserver01 (10.1.0.188) |
-| Part 3 | azuki-sl (10.1.0.204) | azuki-adminpc (10.1.0.108) |
-| Part 4 | azuki-adminpc (10.1.0.108) | azuki-backupsrv (10.1.0.189) |
-
-The attacker systematically moved through the network, ultimately reaching the backup infrastructure from the CEO's PC - likely using credentials stolen from the KeePass database exfiltrated earlier in the same attack session.
-
 **MITRE ATT&CK Reference:**
 - Remote Services: SSH (T1021.004)
 
@@ -364,7 +353,7 @@ DeviceProcessEvents
 
 **Analysis:**
 
-The attacker used `cat /etc/passwd` to enumerate all local user accounts on the Linux backup server. This file contains user account information including usernames, user IDs, group IDs, home directories, and default shells.
+The attacker used `cat /etc/passwd` to enumerate all local user accounts on the Linux backup server. This file contains user account information, including usernames, user IDs, group IDs, home directories, and default shells.
 
 The query also revealed additional reconnaissance activity:
 
@@ -389,8 +378,6 @@ The `/etc/passwd` enumeration happened just 2 seconds after the `find` command (
 **Objective:** Identify the command used to reveal scheduled jobs on the system.
 
 **Reference:** This finding was derived from the same query results as Flag 6.
-
-<img width="1200" alt="6 7" src="https://github.com/user-attachments/assets/884c6fd9-d9fa-49fa-be43-6cceda82c1cd" />
 
 **Finding:**
 
