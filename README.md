@@ -1,6 +1,6 @@
 # Threat Hunt: THE AZUKI BREACH SAGA
 
-<img width="2752" height="1536" alt="azuki_poster" src="https://github.com/user-attachments/assets/fbeb8c3d-7ad7-4752-b084-2700f0eabb4e" />
+<img width="2752" height="1536" alt="azuki" src="https://github.com/user-attachments/assets/139f09ad-7a9b-466a-9ce0-2ca0d0b0dc47" />
 
 ## Executive Summary
 
