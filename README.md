@@ -165,7 +165,7 @@ The investigation spanned **8 days of attacker dwell time** (November 19-27, 202
         │                               │                                  │ SSH
         │                               ▼                                  ▼
         │                      ┌─────────────────┐                ┌─────────────────┐
-        │        PsExec        │  azuki-logistics│                │ azuki-backupsrv  │
+        │        PsExec        │  azuki-logistics│                │ azuki-backupsrv │
         │◀─────────────────────│    10.1.0.102   │                │    10.1.0.189   │
         │                      │                 │                │  (Linux Backup) │
         │                      │  • Nov 25       │                │                 │
@@ -464,7 +464,7 @@ The ransom note included a vulnerability assessment identifying the following se
 
 ### Part 3: Bridge Takeover
 - [Part 3 README](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/tree/main/part-3-bridge-takeover/README.md)
-- [Part 3 IOCs](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/art-3-bridge-takeover/docs/indicators-of-compromise.md)
+- [Part 3 IOCs](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-3-bridge-takeover/docs/indicators-of-compromise.md)
 - [Part 3 Timeline](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-3-bridge-takeover/docs/chronological-timeline.md)
 
 ### Part 4: Dead in the Water
