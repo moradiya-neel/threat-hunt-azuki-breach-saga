@@ -36,7 +36,7 @@ The investigation identified an active intrusion by JADE SPIDER (also known as A
 | Typical Dwell Time | 21-45 days |
 | Last Observed | November 2025 |
 
-### Known Behaviour
+### Known Behavior
 
 JADE SPIDER demonstrates the following operational characteristics:
 

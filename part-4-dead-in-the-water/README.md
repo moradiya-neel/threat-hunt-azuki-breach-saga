@@ -1727,7 +1727,7 @@ The attacker used **PsExec64.exe** to remotely deploy `silentlynx.exe` to all Wi
 ## References
 
 - [JADE SPIDER Threat Intel Report](https://www.notion.so/JADE-SPIDER-2b0cf57416ff80f38f39f75f670b09e2)
-- [Ransome Note](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-4-dead-in-the-water/docs/ransom-note.md)
+- [Ransom Note](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-4-dead-in-the-water/docs/ransom-note.md)
 - [Additional Details - By Threat Hunt Organizor](https://github.com/moradiya-neel/threat-hunt-azuki-breach-saga/blob/main/part-4-dead-in-the-water/docs/additional-details.md)
 - [MITRE ATT&CK Framework](https://attack.mitre.org/)
 - [Microsoft Defender for Endpoint Documentation](https://docs.microsoft.com/en-us/microsoft-365/security/defender-endpoint/)
