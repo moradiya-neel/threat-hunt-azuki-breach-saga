@@ -6,7 +6,7 @@
 
 This document summarizes the complete threat hunting investigation conducted on Azuki Import/Export Trading Co. (梓貿易株式会社) following a devastating ransomware attack by the JADE SPIDER threat actor group, operating under their "SilentLynx" ransomware-as-a-service (RaaS) brand.
 
-The investigation spanned **8 days of attacker dwell time** (November 19-27, 2025) and was conducted across **4 investigative parts**, analyzing over **90 flags** of malicious activity. The attack culminated in the encryption of **847,293 files** (847.2 GB) and exfiltration of **126.6 GB** of sensitive corporate data, with a ransom demand of **$850,000 USD** in Monero cryptocurrency.
+The investigation spanned **8 days of attacker dwell time** (November 19-27, 2025) and was conducted across **4 investigative parts**, analyzing **91 flags** of malicious activity. The attack culminated in the encryption of **847,293 files** (847.2 GB) and exfiltration of **126.6 GB** of sensitive corporate data, with a ransom demand of **$850,000 USD** in Monero cryptocurrency.
 
 ---
 
